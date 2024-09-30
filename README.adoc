@@ -30,4 +30,11 @@ To run your application:
 * https://groups.google.com/forum/?fromgroups#!forum/vertx[Vert.x User Group]
 * https://discord.gg/6ry7aqPWXy[Vert.x Discord]
 
-
+[source,bash]
+----
+podman run --name keycloak_unoptimized -p 8080:8080 \
+  -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \
+  -v $PWD/realms:/opt/keycloak/data/import \
+  quay.io/keycloak/keycloak:latest \
+  start-dev --import-realm
+----

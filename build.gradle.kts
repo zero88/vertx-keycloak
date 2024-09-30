@@ -16,6 +16,7 @@ repositories {
 
 val vertxVersion = "4.5.9"
 val junitJupiterVersion = "5.9.1"
+val log4j2Version = "2.23.1"
 
 val mainVerticleName = "com.example.starter.MainVerticle"
 val launcherClassName = "io.vertx.core.Launcher"
@@ -34,6 +35,8 @@ dependencies {
   implementation("io.vertx:vertx-web-sstore-cookie")
   implementation("io.vertx:vertx-auth-jwt")
   implementation("io.vertx:vertx-auth-oauth2")
+  implementation("org.apache.logging.log4j:log4j-api:$log4j2Version")
+  implementation("org.apache.logging.log4j:log4j-core:$log4j2Version")
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
 }
