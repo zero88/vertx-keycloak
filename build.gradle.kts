@@ -35,6 +35,7 @@ dependencies {
   implementation("io.vertx:vertx-web-sstore-cookie")
   implementation("io.vertx:vertx-auth-jwt")
   implementation("io.vertx:vertx-auth-oauth2")
+  implementation("org.keycloak:keycloak-authz-client:26.0.1")
   implementation("org.apache.logging.log4j:log4j-api:$log4j2Version")
   implementation("org.apache.logging.log4j:log4j-core:$log4j2Version")
   testImplementation("io.vertx:vertx-junit5")

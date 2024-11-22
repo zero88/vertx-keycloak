@@ -15,7 +15,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
-import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -56,21 +55,24 @@ public class MainVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
         SessionHandler sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx));
         CSRFHandler csrfHandler = CSRFHandler.create(vertx, webConfig.getString("auth.csrfSecret"));
-        router.route().handler(sessionHandler) // session handler
+        router.route() // all routes
+              .handler(sessionHandler) // session handler
               .handler(BodyHandler.create())  // Expose form parameters in request
               .handler(csrfHandler); // CSRF handler setup required for logout form
 
         setupAuthRoutes(router, webConfig);
 
-        int port = webConfig.getInteger("http.port");
-        vertx.createHttpServer().requestHandler(router).listen(port).onComplete(http -> {
-            if (http.succeeded()) {
-                startPromise.complete();
-                LOGGER.info("HTTP server started on port {}", port);
-            } else {
-                startPromise.fail(http.cause());
-            }
-        });
+        vertx.createHttpServer()
+             .requestHandler(router)
+             .listen(webConfig.getInteger("http.port"))
+             .onSuccess(httpServer -> {
+                 LOGGER.info("HTTP server started on port {}", httpServer.actualPort());
+                 startPromise.complete();
+             })
+             .onFailure(err -> {
+                 LOGGER.error("Started failed", err);
+                 startPromise.fail(err);
+             });
     }
 
     private void setupAuthRoutes(Router router, JsonObject webConfig) {
@@ -108,8 +110,11 @@ public class MainVerticle extends AbstractVerticle {
         router.get("/logout").handler(this::handleLogout);
     }
 
-    private void handleRevoke(RoutingContext routingContext, OAuth2Auth oAuth2Auth) {
-
+    private void handleRevoke(RoutingContext ctx, OAuth2Auth oAuth2Auth) {
+        User user = ctx.user();
+        oAuth2Auth.revoke(user)
+                  .onSuccess(v -> LOGGER.info("revoke success for user {}", user))
+                  .onFailure(err -> LOGGER.error("Revoke failed", err));
     }
 
     private void handleUserInfo(RoutingContext ctx, OAuth2Auth oAuth2Auth) {
